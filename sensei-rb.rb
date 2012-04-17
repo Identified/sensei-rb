@@ -1,3 +1,20 @@
+# Query DSL for SenseiDB
+# The basic grammar is as follows:
+
+# query := {field => value}  (produces a term query)
+#          / {field => [values ...]}  (produces a boolean query composed of the OR of {field => value} queries for each value)
+#          / {field => (start..end)} (produces a range query on field between start and end)
+#          / query & query  (ANDs two subqueries together)
+#          / query | query  (ORs two subqueries together)
+# 
+# value := something that should probably be a string, but might work if it isn't
+# 
+# In theory this grammar should be literally followable, as in you should be able to arbitrarily
+# substitute in any of the productions for `query' anywhere you see a query on the RHS of a rule.
+# 
+# Queries can also be constructed programmatically, by instantiating the relevant query classes
+# with the proper options.
+
 module Sensei
   CONSTRUCT_BLOCK_KEY='in_sensei_construct'
   
@@ -19,7 +36,7 @@ module Sensei
     end
   end
 
-  [Hash, Range].each do |klass|
+  [Hash].each do |klass|
     conflicts = klass.instance_methods & Operators.instance_methods
     non_conflicts = Operators.instance_methods - conflicts
 
