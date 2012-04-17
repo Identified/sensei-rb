@@ -9,11 +9,25 @@
 # 
 # value := something that should probably be a string, but might work if it isn't
 # 
-# In theory this grammar should be literally followable, as in you should be able to arbitrarily
-# substitute in any of the productions for `query' anywhere you see a query on the RHS of a rule.
+# In theory this grammar should be literally followable (modulo operator precedence, which is
+# established by Ruby), as in you should be able to arbitrarily substitute in any of the 
+# productions for `query' anywhere you see a query on the RHS of a rule.
 # 
 # Queries can also be constructed programmatically, by instantiating the relevant query classes
-# with the proper options.
+# with the proper options, but that's not nearly as fun.
+# 
+# Note: use of the overloaded operator monkey business is best performed within the context of
+# a Sensei::Query.construct block, i.e.
+
+#      Sensei::Query.construct do
+#        ({:foo => (15..30)} & {:bar => '1'}).boost!(10) | {:baz => 'wiz'}
+#      end
+
+# In particular, literal hash queries will not act as sensei queries outside of this block, but
+# will instead act like whatever Arel/ActiveRecord/whatnot feels like having them be.  Thus if
+# you wanted to do something similar outside of the Query.construct block, you would have to
+# call #to_sensei on every hash literal instance that you see (actually just the leftmost one
+# in an operator chain, but whatever).
 
 module Sensei
   CONSTRUCT_BLOCK_KEY='in_sensei_construct'
@@ -58,6 +72,39 @@ module Sensei
       klass.class_eval do
         define_method(meth.to_sym) { |*args| self.to_sensei.send(meth, *args) }
       end
+    end
+  end
+
+
+  # Some example query building, taken from the Webster::Search class.
+  module Examples
+    def network_boostage(options)
+      [options[:boost] || 1].tap { |x| x << (x[0] + (options[:identified_boost] || 0)) }
+    end
+
+    def first_degree_friend_query(candidate, options={})
+      boost, id_boost = network_boostage(options)
+      Sensei::Query.construct do
+        {identified_friends: candidate.id}.boost!(id_boost) & {friends: candidate.id}.boost!(boost)
+      end
+    end
+
+    def second_degree_friend_query(candidate, options={})
+      boost, id_boost = network_boostage(options)
+      id_friends = candidate.identified_buddies.map(&:id).map(&:to_s)
+      Sensei::Query.construct do
+        if id_friends.length == 0
+          {type:'nothing'}
+        else
+          {identified_friends: id_friends}.boost!(id_boost) | {friends: id_friends}.boost!(boost)
+        end
+      end
+    end
+
+    def similarities(candidate, fields)
+      fields.map do |field|
+        {"#{field}_ids" => candidate.send(field.pluralize).map(&:id).map(&:to_s)}.to_sensei
+      end.reduce(&:|)
     end
   end
 
