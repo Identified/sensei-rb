@@ -2,7 +2,8 @@
 # The basic grammar is as follows:
 
 # query := {field => value}  (produces a term query)
-#          / {field => [values ...]}  (produces a boolean query composed of the OR of {field => value} queries for each value)
+#          / {field => [values ...]}  (produces a boolean query composed of 
+#                                      the OR of {field => value} queries for each value)
 #          / {field => (start..end)} (produces a range query on field between start and end)
 #          / query & query  (ANDs two subqueries together)
 #          / query | query  (ORs two subqueries together)
