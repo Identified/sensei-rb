@@ -115,3 +115,9 @@ class Range
     Sensei::RangeQuery.new(:from => self.begin, :to => self.end, :field => field)
   end
 end
+
+class Array
+  def to_sensei(field, op=:should)
+    Sensei::BoolQuery.new(:operation => op, :operands => self.map{|value| {field => value}.to_sensei})
+  end
+end
