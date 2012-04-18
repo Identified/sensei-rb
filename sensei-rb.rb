@@ -51,13 +51,14 @@ module Sensei
     end
   end
 
-  [Hash].each do |klass|
-    conflicts = klass.instance_methods & Operators.instance_methods
-    non_conflicts = Operators.instance_methods - conflicts
+  def self.setup_operators
+    [Hash].each do |klass|
+      conflicts = klass.instance_methods & Operators.instance_methods
+      non_conflicts = Operators.instance_methods - conflicts
 
-    conflicts.each do |override_method|
-      klass.class_eval do
-        define_method(:"#{override_method}_with_sensei_construct") do |*args|
+      conflicts.each do |override_method|
+        klass.class_eval do
+          define_method(:"#{override_method}_with_sensei_construct") do |*args|
           if Thread.current[Sensei::CONSTRUCT_BLOCK_KEY]
             self.to_sensei.send(override_method, *args)
           else
@@ -65,17 +66,17 @@ module Sensei
           end
         end
         
-        alias_method_chain override_method, :sensei_construct
+          alias_method_chain override_method, :sensei_construct
+        end
       end
-    end
-
-    non_conflicts.each do |meth|
-      klass.class_eval do
-        define_method(meth.to_sym) { |*args| self.to_sensei.send(meth, *args) }
+      
+      non_conflicts.each do |meth|
+        klass.class_eval do
+          define_method(meth.to_sym) { |*args| self.to_sensei.send(meth, *args) }
+        end
       end
     end
   end
-
 
   # Some example query building, taken from the Webster::Search class.
   module Examples
