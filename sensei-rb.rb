@@ -59,13 +59,13 @@ module Sensei
       conflicts.each do |override_method|
         klass.class_eval do
           define_method(:"#{override_method}_with_sensei_construct") do |*args|
-          if Thread.current[Sensei::CONSTRUCT_BLOCK_KEY]
-            self.to_sensei.send(override_method, *args)
-          else
-            self.send(:"#{override_method}_without_sensei_construct", *args)
+            if Thread.current[Sensei::CONSTRUCT_BLOCK_KEY]
+              self.to_sensei.send(override_method, *args)
+            else
+              self.send(:"#{override_method}_without_sensei_construct", *args)
+            end
           end
-        end
-        
+          
           alias_method_chain override_method, :sensei_construct
         end
       end
