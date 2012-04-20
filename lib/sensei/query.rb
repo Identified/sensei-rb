@@ -32,7 +32,7 @@
 
 module Sensei
   CONSTRUCT_BLOCK_KEY='in_sensei_construct'
-  
+
   module Operators
     def &(x)
       BoolQuery.new(:operands => [self.to_sensei, x.to_sensei], :operation => :must)
@@ -65,11 +65,11 @@ module Sensei
               self.send(:"#{override_method}_without_sensei_construct", *args)
             end
           end
-          
+
           alias_method_chain override_method, :sensei_construct
         end
       end
-      
+
       non_conflicts.each do |meth|
         klass.class_eval do
           define_method(meth.to_sym) { |*args| self.to_sensei.send(meth, *args) }
@@ -130,7 +130,7 @@ module Sensei
     def self.construct &block
       Thread.current[Sensei::CONSTRUCT_BLOCK_KEY] = true
       begin
-        block.call.to_sensei
+        block.call
       ensure
         Thread.current[Sensei::CONSTRUCT_BLOCK_KEY] = false
       end
