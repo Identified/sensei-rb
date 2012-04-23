@@ -51,7 +51,7 @@ module Sensei
       end
     end
 
-    def run
+    def search
       req = Curl::Easy.new(Webster::Config.sensei_url)
       req.http_post(self.to_h.to_json)
       JSON.parse(req.body_str)
