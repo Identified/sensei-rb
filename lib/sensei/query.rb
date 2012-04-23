@@ -127,6 +127,11 @@ module Sensei
       self
     end
 
+    def self.and_terms(field, values)
+      terms = values.map do |value| {field => value}.to_sensei end
+      Sensei::BoolQuery.new(:operation => :must, :operands => terms)
+    end
+
     def self.construct &block
       Thread.current[Sensei::CONSTRUCT_BLOCK_KEY] = true
       begin
@@ -138,10 +143,18 @@ module Sensei
   end
 
   class BoolQuery < Query
+    def not_query_opts
+      if options[:operation] == :must_not
+        {:should => [{match_all: {}}]}
+      else
+        {}
+      end
+    end
+
     def to_h
       {:bool => {
           options[:operation] => options[:operands].map(&:to_h)
-        }.merge(get_boost)
+        }.merge(get_boost).merge(not_query_opts)
       }
     end
   end
