@@ -140,21 +140,30 @@ module Sensei
         Thread.current[Sensei::CONSTRUCT_BLOCK_KEY] = false
       end
     end
+
+    def not_query?
+      self.is_a?(Sensei::BoolQuery) && options[:operation] == :must_not
+    end
   end
 
   class BoolQuery < Query
-    def not_query_opts
-      if options[:operation] == :must_not
-        {:should => [{match_all: {}}]}
-      else
-        {}
-      end
-    end
-
     def to_h
+      if self.not_query?
+        raise Exception, "Error: independent boolean NOT query not allowed."
+      end
+
+      not_queries = options[:operands].select(&:not_query?).map{|x| x.options[:operands].map(&:to_h)}.flatten
+      if not_queries.count > 0
+        not_queries = {:must_not => not_queries}
+      else
+        not_queries = {}
+      end
+
+      non_not_queries = options[:operands].reject(&:not_query?)
+
       {:bool => {
-          options[:operation] => options[:operands].map(&:to_h)
-        }.merge(get_boost).merge(not_query_opts)
+          options[:operation] => non_not_queries.map(&:to_h)
+        }.merge(get_boost).merge(not_queries)
       }
     end
   end
