@@ -127,11 +127,6 @@ module Sensei
       self
     end
 
-    def self.and_terms(field, values)
-      terms = values.map do |value| {field => value}.to_sensei end
-      Sensei::BoolQuery.new(:operation => :must, :operands => terms)
-    end
-
     def self.construct &block
       Thread.current[Sensei::CONSTRUCT_BLOCK_KEY] = true
       begin
