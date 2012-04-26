@@ -78,38 +78,6 @@ module Sensei
     end
   end
 
-  # Some example query building, taken from the Webster::Search class.
-  module Examples
-    def network_boostage(options)
-      [options[:boost] || 1].tap { |x| x << (x[0] + (options[:identified_boost] || 0)) }
-    end
-
-    def first_degree_friend_query(candidate, options={})
-      boost, id_boost = network_boostage(options)
-      Sensei::Query.construct do
-        {identified_friends: candidate.id}.boost!(id_boost) & {friends: candidate.id}.boost!(boost)
-      end
-    end
-
-    def second_degree_friend_query(candidate, options={})
-      boost, id_boost = network_boostage(options)
-      id_friends = candidate.identified_buddies.map(&:id).map(&:to_s)
-      Sensei::Query.construct do
-        if id_friends.length == 0
-          {type:'nothing'}
-        else
-          {identified_friends: id_friends}.boost!(id_boost) | {friends: id_friends}.boost!(boost)
-        end
-      end
-    end
-
-    def similarities(candidate, fields)
-      fields.map do |field|
-        {"#{field}_ids" => candidate.send(field.pluralize).map(&:id).map(&:to_s)}.to_sensei
-      end.reduce(&:|)
-    end
-  end
-
   class Query
     attr_accessor :options
 
