@@ -21,15 +21,18 @@ module Sensei
     end
 
     def all(q)
-      @query &= q.to_sensei
+      @query ? (@query &= q.to_sensei) : (@query = q.to_sensei)
+      self
     end
 
     def any(q)
-      @query |= q.to_sensei
+      @query ? (@query |= q.to_sensei) : (@query = q.to_sensei)
+      self
     end
 
     def not(q)
-      @query &= q.to_sensei.must_not
+      @query ? (@query &= q.to_sensei.must_not) : (@query = q.to_sensei.must_not)
+      self
     end
 
     # Do facet selection
