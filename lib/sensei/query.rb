@@ -80,6 +80,7 @@ module Sensei
 
   class Query
     attr_accessor :options
+    cattr_accessor :result_klass
 
     include Operators
 
@@ -109,7 +110,12 @@ module Sensei
     end
 
     def run(options = {})
-      Sensei::Client.new(options.merge(:query => self)).search
+      results = Sensei::Client.new(options.merge(:query => self)).search
+      if @@result_klass
+        @@result_klass.new(results)
+      else
+        results
+      end
     end
   end
 
