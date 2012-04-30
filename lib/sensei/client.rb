@@ -20,6 +20,18 @@ module Sensei
       self
     end
 
+    def all(q)
+      @query &= q.to_sensei
+    end
+
+    def any(q)
+      @query |= q.to_sensei
+    end
+
+    def not(q)
+      @query &= q.to_sensei.must_not
+    end
+
     # Do facet selection
     def selection(fields = {})
       @selections.merge!(fields)
