@@ -1,7 +1,7 @@
 module Sensei
   class Client
     def initialize optargs={}
-      @query = optargs[:query]
+      @query = optargs[:query].try(:to_sensei)
       @facets = (optargs[:facets] || {})
       @selections = (optargs[:selections] || {})
       @other_options = optargs.dup.keep_if {|k,v| ![:query, :facets, :selections].member?(k)}
@@ -16,7 +16,7 @@ module Sensei
     end
 
     def query(q)
-      @query=q.to_sensei.to_h
+      @query=q.to_sensei
       self
     end
 
@@ -33,7 +33,7 @@ module Sensei
 
     def to_h
       out = {}
-      (out[:query] = @query) if @query
+      (out[:query] = @query.to_h) if @query
       (out[:facets] = @facets) if @facets.count > 0
       selections = @selections.map { |field, terms| {:terms => {field => {values: terms, :operator => "or"}}} }
       (out[:selections] = selections) if selections.count > 0
@@ -67,9 +67,10 @@ module Sensei
         all_selection_results['facets'][field] += counts
       end
 
-      Hash[*all_selection_results['facets'].map do |k,v|
-             [k, v.uniq_by{|x| x['value']}]
-           end.flatten(1)]
+      all_selection_results['facets'] = Hash[*all_selection_results['facets'].map do |k,v|
+                                               [k, v.uniq_by{|x| x['value']}]
+                                             end.flatten(1)]
+      all_selection_results
     end
 
     # This method builds the requests necessary to perform the `select_search' method.
