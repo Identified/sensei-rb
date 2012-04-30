@@ -46,6 +46,7 @@ module Sensei
       Sensei::Query.construct do
         out.instance_eval &block
       end
+      out
     end
 
     def search
