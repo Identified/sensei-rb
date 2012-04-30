@@ -107,6 +107,10 @@ module Sensei
     def not_query?
       self.is_a?(Sensei::BoolQuery) && options[:operation] == :must_not
     end
+
+    def run(options = {})
+      Sensei::Client.new(options.merge(:query => self)).search
+    end
   end
 
   class BoolQuery < Query
