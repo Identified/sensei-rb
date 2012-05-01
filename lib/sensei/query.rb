@@ -120,30 +120,38 @@ module Sensei
   end
 
   class BoolQuery < Query
+    def operands
+      options[:operands]
+    end
+
     def to_h
       if self.not_query?
         raise Exception, "Error: independent boolean NOT query not allowed."
       end
 
-      not_queries = options[:operands].select(&:not_query?).map{|x| x.options[:operands].map(&:to_h)}.flatten
-      if not_queries.count > 0
-        not_queries = {:must_not => not_queries}
-      else
-        not_queries = {}
-      end
+      not_queries, non_not_queries = operands.partition(&:not_query?)
+      not_queries = not_queries.map{|x| x.operands.map(&:to_h)}.flatten
 
-      non_not_queries = options[:operands].reject(&:not_query?)
+      non_not_queries = non_not_queries.reject{|x| x.is_a? AllQuery} if options[:operation] == :must
+
+      subqueries = non_not_queries.map(&:to_h)
+      mergeable, nonmergeable = subqueries.partition{|x| x[:bool] && x[:bool][options[:operation]]}
+      merged_queries = mergeable.map{|x| x[:bool][options[:operation]]}.flatten(1)
+      merged_nots = mergeable.map{|x| x[:bool][:must_not] || []}.flatten(1)
+
+      all_nots = merged_nots + not_queries
+      not_clause = (all_nots.count > 0 ? {:must_not => all_nots} : {})
 
       {:bool => {
-          options[:operation] => non_not_queries.map(&:to_h)
-        }.merge(get_boost).merge(not_queries)
+          options[:operation] => nonmergeable + merged_queries
+        }.merge(get_boost).merge(not_clause)
       }
     end
   end
 
   class TermQuery < Query
     def to_h
-      {:term => {options[:field] => {:value => options[:value]}.merge(get_boost)}}
+      {:term => {options[:field] => {:value => options[:value].to_s}.merge(get_boost)}}
     end
   end
 
@@ -156,6 +164,12 @@ module Sensei
           }.merge(get_boost)
         }
       }
+    end
+  end
+
+  class AllQuery < Query
+    def to_h
+      {:match_all => {}.merge(get_boost)}
     end
   end
 end
