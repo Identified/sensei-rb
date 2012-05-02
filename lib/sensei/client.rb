@@ -1,5 +1,12 @@
 module Sensei
   class Client
+    cattr_accessor :sensei_host, :sensei_port
+
+    def self.sensei_url
+      raise unless sensei_host
+      "http://#{sensei_host}:#{sensei_port || 8080}/sensei"
+    end
+
     def initialize optargs={}
       @query = optargs[:query].try(:to_sensei)
       @facets = (optargs[:facets] || {})
@@ -65,7 +72,7 @@ module Sensei
     end
 
     def search
-      req = Curl::Easy.new(Webster::Config.sensei_url)
+      req = Curl::Easy.new(self.class.sensei_url)
       req.http_post(self.to_h.to_json)
       JSON.parse(req.body_str)
     end
