@@ -1,6 +1,6 @@
 module Sensei
   class Client
-    cattr_accessor :sensei_host, :sensei_port
+    cattr_accessor :sensei_host, :sensei_port, :http_kafka_port
 
     def self.sensei_url
       raise unless sensei_host
@@ -12,6 +12,22 @@ module Sensei
       @facets = (optargs[:facets] || {})
       @selections = (optargs[:selections] || {})
       @other_options = optargs.dup.keep_if {|k,v| ![:query, :facets, :selections].member?(k)}
+    end
+
+    def self.kafka_send items
+      req = Curl::Easy.new("http://#{sensei_host}:#{http_kafka_port}/")
+      req.http_post(items.map(&:to_json).join("\n"))
+      req.body_str
+    end
+
+    def self.delete uids
+      kafka_send uids.map do |uid|
+        {:_type => 'delete', :_uid => uid.to_s}
+      end
+    end
+
+    def self.update(documents)
+      kafka_send documents
     end
 
     DEFAULT_FACET_OPTIONS = {:max => 6, :minCount => 1}
