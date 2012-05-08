@@ -1,6 +1,60 @@
 module Sensei
   class Client
-    cattr_accessor :sensei_host, :sensei_port, :http_kafka_port
+    cattr_accessor :sensei_host, :sensei_port, :http_kafka_port, :uid_key
+
+    DATA_TRANSACTION_KEY = "sensei_client_data_transaction"
+    TEST_TRANSACTION_KEY = "sensei_client_test_transaction"
+
+    def self.current_data_transaction
+      Thread.current[DATA_TRANSACTION_KEY].last
+    end
+
+    def self.current_test_transaction
+      Thread.current[TEST_TRANSACTION_KEY].last
+    end
+
+    def self.begin_transaction key
+      Thread.current[key] ||= []
+      Thread.current[key] << []
+    end
+
+    # This does a "data transaction," in which any update events will get
+    # buffered until the block is finished, after which everything gets sent.
+    def self.transaction &block
+      begin
+        begin_transaction DATA_TRANSACTION_KEY
+        block.call
+        kafka_commit(current_data_transaction)
+      ensure
+        Thread.current[DATA_TRANSACTION_KEY].pop
+      end
+    end
+
+    def self.test_transaction &block
+      begin
+        begin_transaction TEST_TRANSACTION_KEY
+        block.call
+      ensure
+        kafka_rollback(current_test_transaction)
+        Thread.current[TEST_TRANSACTION_KEY].pop
+      end
+    end
+
+    # Undo all of the data events that just occurred.
+    # This is only really useful during tests.  Also,
+    # it's only capable of rolling back insertions.
+    def self.kafka_rollback(data_events)
+      to_delete = data_events.select{|x| x[uid_key]}.map{|x| {:_type => '_delete', :_uid => x[uid_key]}}
+      kafka_commit to_delete
+    end
+
+    def self.in_data_transaction?
+      Thread.current[DATA_TRANSACTION_KEY].count > 0
+    end
+
+    def self.in_test_transaction?
+      Thread.current[TEST_TRANSACTION_KEY].count > 0
+    end
 
     def self.sensei_url
       raise unless sensei_host
@@ -15,6 +69,18 @@ module Sensei
     end
 
     def self.kafka_send items
+      if in_data_transaction?
+        current_data_transaction << items
+      else
+        kafka_commit items
+      end
+
+      if in_test_transaction?
+        Thread.current[TEST_TRANSACTION_KEY].last << items
+      end
+    end
+
+    def self.kafka_commit items
       req = Curl::Easy.new("http://#{sensei_host}:#{http_kafka_port}/")
       req.http_post(items.map(&:to_json).join("\n"))
       req.body_str
