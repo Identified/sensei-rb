@@ -31,8 +31,6 @@
 # in an operator chain, but whatever).
 
 module Sensei
-  CONSTRUCT_BLOCK_KEY='in_sensei_construct'
-
   module Operators
     def &(x)
       BoolQuery.new(:operands => [self.to_sensei, x.to_sensei], :operation => :must)
@@ -48,33 +46,6 @@ module Sensei
 
     def boost! amt
       self.to_sensei.tap do |x| x.options[:boost] = amt end
-    end
-  end
-
-  def self.setup_operators
-    [Hash].each do |klass|
-      conflicts = klass.instance_methods & Operators.instance_methods
-      non_conflicts = Operators.instance_methods - conflicts
-
-      conflicts.each do |override_method|
-        klass.class_eval do
-          define_method(:"#{override_method}_with_sensei_construct") do |*args|
-            if Thread.current[Sensei::CONSTRUCT_BLOCK_KEY]
-              self.to_sensei.send(override_method, *args)
-            else
-              self.send(:"#{override_method}_without_sensei_construct", *args)
-            end
-          end
-
-          alias_method_chain override_method, :sensei_construct
-        end
-      end
-
-      non_conflicts.each do |meth|
-        klass.class_eval do
-          define_method(meth.to_sym) { |*args| self.to_sensei.send(meth, *args) }
-        end
-      end
     end
   end
 
@@ -97,12 +68,11 @@ module Sensei
     end
 
     def self.construct &block
-      Thread.current[Sensei::CONSTRUCT_BLOCK_KEY] = true
-      begin
-        block.call
-      ensure
-        Thread.current[Sensei::CONSTRUCT_BLOCK_KEY] = false
-      end
+      class_eval(&block)
+    end
+
+    def self.q(h)
+      h.to_sensei
     end
 
     def not_query?
@@ -161,8 +131,9 @@ module Sensei
           options[:field] => {
             :from => options[:from],
             :to => options[:to],
+            :_type => (options[:from].is_a?(Float) || options[:to].is_a?(Float)) ? "double" : "float"
           }.merge(get_boost)
-        }
+        },
       }
     end
   end
