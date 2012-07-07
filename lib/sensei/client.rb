@@ -18,6 +18,11 @@ module Sensei
       Thread.current[key] << []
     end
 
+    def self.in_sensei_transaction? key
+      Thread.current[key] ||= []
+      Thread.current[key].count > 0
+    end
+
     # This does a "data transaction," in which any update events will get
     # buffered until the block is finished, after which everything gets sent.
     def self.transaction &block
@@ -49,11 +54,11 @@ module Sensei
     end
 
     def self.in_data_transaction?
-      Thread.current[DATA_TRANSACTION_KEY].count > 0
+      self.in_sensei_transaction? DATA_TRANSACTION_KEY
     end
 
     def self.in_test_transaction?
-      Thread.current[TEST_TRANSACTION_KEY].count > 0
+      self.in_sensei_transaction? TEST_TRANSACTION_KEY
     end
 
     def self.sensei_url
