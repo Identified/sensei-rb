@@ -1,6 +1,6 @@
 module Sensei
   class Client
-    cattr_accessor :sensei_host, :sensei_port, :http_kafka_port, :uid_key
+    cattr_accessor :sensei_hosts, :sensei_port, :http_kafka_port, :uid_key, :http_kafka_hosts
 
     DATA_TRANSACTION_KEY = "sensei_client_data_transaction"
     TEST_TRANSACTION_KEY = "sensei_client_test_transaction"
@@ -62,8 +62,8 @@ module Sensei
     end
 
     def self.sensei_url
-      raise unless sensei_host
-      "http://#{sensei_host}:#{sensei_port || 8080}/sensei"
+      raise unless sensei_hosts
+      "http://#{sensei_hosts.sample}:#{sensei_port || 8080}/sensei"
     end
 
     def initialize optargs={}
@@ -86,7 +86,7 @@ module Sensei
     end
 
     def self.kafka_commit items
-      req = Curl::Easy.new("http://#{sensei_host}:#{http_kafka_port}/")
+      req = Curl::Easy.new("http://#{http_kafka_hosts.sample}:#{http_kafka_port}/")
       req.http_post(items.map(&:to_json).join("\n"))
       req.body_str
     end
@@ -150,7 +150,7 @@ module Sensei
       out
     end
 
-    def self.construct options, &block
+    def self.construct options={}, &block
       out = self.new(options)
       q = Sensei::Query.construct &block
       out.query(q)
