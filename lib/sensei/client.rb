@@ -1,6 +1,6 @@
 module Sensei
   class Client
-    cattr_accessor :sensei_hosts, :sensei_port, :http_kafka_port, :uid_key, :http_kafka_hosts
+    cattr_accessor :sensei_hosts, :sensei_port, :http_kafka_port, :uid_key, :http_kafka_hosts, :fake_update
 
     DATA_TRANSACTION_KEY = "sensei_client_data_transaction"
     TEST_TRANSACTION_KEY = "sensei_client_test_transaction"
@@ -86,9 +86,11 @@ module Sensei
     end
 
     def self.kafka_commit items
-      req = Curl::Easy.new("http://#{http_kafka_hosts.sample}:#{http_kafka_port}/")
-      req.http_post(items.map(&:to_json).join("\n"))
-      req.body_str
+      if !fake_update
+        req = Curl::Easy.new("http://#{http_kafka_hosts.sample}:#{http_kafka_port}/")
+        req.http_post(items.map(&:to_json).join("\n"))
+        req.body_str
+      end
     end
 
     def self.delete uids
