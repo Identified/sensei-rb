@@ -1,34 +1,23 @@
 # Query DSL for SenseiDB
 # The basic grammar is as follows:
 
-# query := {field => value}  (produces a term query)
-#          / {field => [values ...]}  (produces a boolean query composed of 
+# query :=   q(field => value)  (produces a term query)
+#          / q(field => [values ...])  (produces a boolean query composed of 
 #                                      the OR of {field => value} queries for each value)
-#          / {field => (start..end)} (produces a range query on field between start and end)
+#          / q(field => (start..end)) (produces a range query on field between start and end)
 #          / query & query  (ANDs two subqueries together)
 #          / query | query  (ORs two subqueries together)
 # 
 # value := something that should probably be a string, but might work if it isn't
 # 
-# In theory this grammar should be literally followable (modulo operator precedence, which is
-# established by Ruby), as in you should be able to arbitrarily substitute in any of the 
-# productions for `query' anywhere you see a query on the RHS of a rule.
-# 
-# Queries can also be constructed programmatically, by instantiating the relevant query classes
-# with the proper options, but that's not nearly as fun.
-# 
-# Note: use of the overloaded operator monkey business is best performed within the context of
+# Note: use of the `q' operator must be performed within the context of
 # a Sensei::Query.construct block, i.e.
 
 #      Sensei::Query.construct do
-#        ({:foo => (15..30)} & {:bar => '1'}).boost!(10) | {:baz => 'wiz'}
+#        (q(:foo => (15..30)) & q(:bar => '1')).boost!(10) | q(:baz => 'wiz')
 #      end
 
-# In particular, literal hash queries will not act as sensei queries outside of this block, but
-# will instead act like whatever Arel/ActiveRecord/whatnot feels like having them be.  Thus if
-# you wanted to do something similar outside of the Query.construct block, you would have to
-# call #to_sensei on every hash literal instance that you see (actually just the leftmost one
-# in an operator chain, but whatever).
+# If you're not in a construct block, you can still do Sensei::Query.q(...).
 
 module Sensei
   module Operators
