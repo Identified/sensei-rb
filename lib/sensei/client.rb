@@ -83,6 +83,7 @@ module Sensei
       if in_test_transaction?
         Thread.current[TEST_TRANSACTION_KEY].last << items
       end
+      true
     end
 
     def self.kafka_commit items
