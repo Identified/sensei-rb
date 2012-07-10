@@ -95,9 +95,9 @@ module Sensei
     end
 
     def self.delete uids
-      kafka_send uids.map do |uid|
-        {:_type => 'delete', :_uid => uid.to_s}
-      end
+      kafka_send(uids.map do |uid|
+                   {:_type => 'delete', :_uid => uid.to_s}
+                 end)
     end
 
     def self.update(documents)
