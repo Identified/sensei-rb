@@ -157,10 +157,14 @@ module Sensei
       out
     end
 
+    def self.q h
+      h.to_sensei
+    end
+
     def self.construct options={}, &block
       out = self.new(options)
-      q = Sensei::Query.construct &block
-      out.query(q)
+      search_query = class_eval(&block)
+      out.query(search_query)
     end
 
     def search
