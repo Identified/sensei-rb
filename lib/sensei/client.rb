@@ -1,3 +1,5 @@
+require 'yaml'
+
 module Sensei
   class Client
     cattr_accessor :sensei_hosts, :sensei_port, :http_kafka_port, :uid_key, :http_kafka_hosts, :fake_update
@@ -7,8 +9,12 @@ module Sensei
     
     def self.configure(path = "config/sensei.yml")
       if File.exists? path
-        config = YAML.load_file(path)[Rails.env]
+        config = YAML.load_file(path)
         
+        # Limit config to specific environment if Rails is defined
+        defined? Rails and
+          config = config[Rails.env]
+
         self.sensei_hosts      = config['sensei_hosts']    
         self.sensei_port       = config['sensei_port']     
         self.http_kafka_port   = config['http_kafka_port'] 
