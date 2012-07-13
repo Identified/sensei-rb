@@ -4,6 +4,22 @@ module Sensei
 
     DATA_TRANSACTION_KEY = "sensei_client_data_transaction"
     TEST_TRANSACTION_KEY = "sensei_client_test_transaction"
+    
+    def self.configure(path = "config/sensei.yml")
+      if File.exists? path
+        config = YAML.load_file(path)[Rails.env]
+        
+        self.sensei_hosts      = config['sensei_hosts']    
+        self.sensei_port       = config['sensei_port']     
+        self.http_kafka_port   = config['http_kafka_port'] 
+        self.uid_key           = config['uid_key']         
+        self.http_kafka_hosts  = config['http_kafka_hosts']
+        self.fake_update       = config['fake_update'] || false     
+      end
+      
+      yield self if block_given?
+    end
+
 
     def self.current_data_transaction
       Thread.current[DATA_TRANSACTION_KEY].last
