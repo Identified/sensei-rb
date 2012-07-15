@@ -94,7 +94,12 @@ module Sensei
       non_not_queries = non_not_queries.reject{|x| x.is_a? AllQuery} if options[:operation] == :must
 
       subqueries = non_not_queries.map(&:to_h)
-      mergeable, nonmergeable = subqueries.partition{|x| x[:bool] && x[:bool][options[:operation]]}
+      mergeable, nonmergeable = subqueries.partition do |x|
+        isbool = x[:bool]
+        sameop = isbool && isbool[options[:operation]]
+        boosted = isbool && isbool[:boost]
+        isbool && sameop && (boosted.nil? || boosted == options[:boost])
+      end
       merged_queries = mergeable.map{|x| x[:bool][options[:operation]]}.flatten(1)
       merged_nots = mergeable.map{|x| x[:bool][:must_not] || []}.flatten(1)
 
