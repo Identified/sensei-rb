@@ -112,6 +112,7 @@ module Sensei
       if !fake_update
         req = Curl::Easy.new("http://#{http_kafka_hosts.sample}:#{http_kafka_port}/")
         req.http_post(items.map(&:to_json).join("\n"))
+        raise Exception if req.response_code != 200
         req.body_str
       end
     end
