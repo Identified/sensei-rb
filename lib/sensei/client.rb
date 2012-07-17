@@ -139,6 +139,10 @@ module Sensei
       self
     end
 
+    def relevance(r)
+      @relevance = r
+    end
+
     def query(q)
       @query=q.to_sensei
       self
@@ -172,7 +176,14 @@ module Sensei
 
     def to_h
       out = {}
-      (out[:query] = @query.to_h) if @query
+      if @query
+        out[:query] = @query.to_h
+        if @relevance
+          out[:query] = Sensei::BoolQuery.new(:operands => [@query], :operation => :must).to_h
+          out[:query][:bool][:relevance] = @relevance
+        end
+      end
+
       (out[:facets] = @facets) if @facets.count > 0
       selections = @selections.map { |field, terms| {:terms => {field => {values: terms, :operator => "or"}}} }
       (out[:selections] = selections) if selections.count > 0
