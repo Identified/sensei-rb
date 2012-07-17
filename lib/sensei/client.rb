@@ -124,11 +124,7 @@ module Sensei
     end
 
     def self.update(documents)
-      begin
-        kafka_send documents
-      rescue
-        nil
-      end
+      kafka_send documents
     end
 
     DEFAULT_FACET_OPTIONS = {:max => 6, :minCount => 1}
