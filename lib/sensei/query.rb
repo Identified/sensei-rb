@@ -29,6 +29,10 @@ module Sensei
       BoolQuery.new(:operands => [self.to_sensei, x.to_sensei], :operation => :should)
     end
 
+    def ~
+      self.must_not
+    end
+
     def must_not
       BoolQuery.new(:operands => [self.to_sensei], :operation => :must_not)
     end
