@@ -33,6 +33,10 @@ module Sensei
       self.must_not
     end
 
+    def *(x)
+      self.boost!(x)
+    end
+
     def must_not
       BoolQuery.new(:operands => [self.to_sensei], :operation => :must_not)
     end
