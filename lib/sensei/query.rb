@@ -22,10 +22,14 @@
 module Sensei
   module Operators
     def &(x)
+      return self if self == x
+      return self if x.is_a? EmptyQuery
       BoolQuery.new(:operands => [self.to_sensei, x.to_sensei], :operation => :must)
     end
 
     def |(x)
+      return self if self == x
+      return self if x.is_a? EmptyQuery
       BoolQuery.new(:operands => [self.to_sensei, x.to_sensei], :operation => :should)
     end
 
@@ -137,6 +141,37 @@ module Sensei
           }.merge(get_boost)
         },
       }
+    end
+  end
+
+  class EmptyQuery < Query
+
+    def &(x)
+      x
+    end
+
+    def |(x)
+      x
+    end
+
+    def ~
+      raise 'Should not call on an empty query'
+    end
+
+    def *(x)
+      raise 'Should not call on an empty query'
+    end
+
+    def must_not
+      raise 'Should not call on an empty query'
+    end
+
+    def boost! amt
+      raise 'Should not call on an empty query'
+    end
+
+    def to_h
+      {}
     end
   end
 
