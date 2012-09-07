@@ -137,6 +137,7 @@ module Sensei
 
     def relevance(r)
       @relevance = r
+      self
     end
 
     def query(q)
