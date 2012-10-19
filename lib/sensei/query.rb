@@ -137,7 +137,7 @@ module Sensei
           options[:field] => {
             :from => options[:from],
             :to => options[:to],
-            :_type => (options[:from].is_a?(Float) || options[:to].is_a?(Float)) ? "double" : "float"
+            :_type => options[:type] || ((options[:from].is_a?(Float) || options[:to].is_a?(Float)) ? "double" : "float")
           }.merge(get_boost)
         },
       }
