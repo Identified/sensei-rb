@@ -138,7 +138,7 @@ module Sensei
             :from => options[:from],
             :to => options[:to],
             :_type => options[:type] || ((options[:from].is_a?(Float) || options[:to].is_a?(Float)) ? "double" : "float")
-          }.merge(get_boost)
+          }.merge(get_boost).merge(options[:type] == :date ? {:_date_format => options[:date_format] || 'YYYY-MM-DD'} : {})
         },
       }
     end
