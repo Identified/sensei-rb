@@ -131,6 +131,12 @@ module Sensei
     end
   end
 
+  class TermsQuery < Query
+    def to_h
+      {:terms => {options[:field] => {:values => options[:values].map(&:to_s)}.merge(get_boost)}}
+    end
+  end
+
   class RangeQuery < Query
     def to_h
       {:range => {
