@@ -186,6 +186,16 @@ module Sensei
       {:match_all => {}.merge(get_boost)}
     end
   end
+
+  class UIDQuery < Query
+    def initialize(uids)
+      uids = [uids] unless uids.is_a?(Array)
+      @uids = uids
+    end
+    def to_h
+      {:ids => {:values => @uids}}
+    end
+  end
 end
 
 class Hash
