@@ -6,23 +6,23 @@ module Sensei
 
     DATA_TRANSACTION_KEY = "sensei_client_data_transaction"
     TEST_TRANSACTION_KEY = "sensei_client_test_transaction"
-    
+
     def self.configure(path = "config/sensei.yml")
       if File.exists? path
         config = YAML.load_file(path)
-        
+
         # Limit config to specific environment if Rails is defined
         defined? Rails and
           config = config[Rails.env]
 
-        self.sensei_hosts      = config['sensei_hosts']    
-        self.sensei_port       = config['sensei_port']     
-        self.http_kafka_port   = config['http_kafka_port'] 
-        self.uid_key           = config['uid_key']         
+        self.sensei_hosts      = config['sensei_hosts']
+        self.sensei_port       = config['sensei_port']
+        self.http_kafka_port   = config['http_kafka_port']
+        self.uid_key           = config['uid_key']
         self.http_kafka_hosts  = config['http_kafka_hosts']
-        self.fake_update       = config['fake_update'] || false     
+        self.fake_update       = config['fake_update'] || false
       end
-      
+
       yield self if block_given?
     end
 
@@ -112,7 +112,7 @@ module Sensei
       if !fake_update
         req = Curl::Easy.new("http://#{http_kafka_hosts.sample}:#{http_kafka_port}/")
         req.http_post(items.map(&:to_json).join("\n"))
-        raise Exception("Kafka url=#{req.url}, response_code=#{req.response_code}, response_body=#{req.body_str}") if req.response_code != 200
+        raise Exception, "Kafka url=#{req.url}, response_code=#{req.response_code}, response_body=#{req.body_str}" if req.response_code != 200
         req.body_str
       end
     end
