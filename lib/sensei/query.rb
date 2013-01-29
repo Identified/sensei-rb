@@ -2,14 +2,14 @@
 # The basic grammar is as follows:
 
 # query :=   q(field => value)  (produces a term query)
-#          / q(field => [values ...])  (produces a boolean query composed of 
+#          / q(field => [values ...])  (produces a boolean query composed of
 #                                      the OR of {field => value} queries for each value)
 #          / q(field => (start..end)) (produces a range query on field between start and end)
 #          / query & query  (ANDs two subqueries together)
 #          / query | query  (ORs two subqueries together)
-# 
+#
 # value := something that should probably be a string, but might work if it isn't
-# 
+#
 # Note: use of the `q' operator must be performed within the context of
 # a Sensei::Query.construct block, i.e.
 
@@ -217,6 +217,10 @@ end
 
 class Array
   def to_sensei(field, op=:should)
-    Sensei::BoolQuery.new(:operation => op, :operands => self.map{|value| {field => value}.to_sensei})
+    if op == :should
+      Sensei::TermsQuery.new(:field => field, :values => self)
+    else
+      Sensei::BoolQuery.new(:operation => op, :operands => self.map{|value| {field => value}.to_sensei})
+    end
   end
 end
