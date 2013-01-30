@@ -218,7 +218,11 @@ end
 class Array
   def to_sensei(field, op=:should)
     if op == :should
-      Sensei::TermsQuery.new(:field => field, :values => self)
+      if self.length == 1
+        Sensei::TermQuery.new(:field => field, :value => self.first)
+      else
+        Sensei::TermsQuery.new(:field => field, :values => self)
+      end
     else
       Sensei::BoolQuery.new(:operation => op, :operands => self.map{|value| {field => value}.to_sensei})
     end
