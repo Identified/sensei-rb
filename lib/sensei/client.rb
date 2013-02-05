@@ -1,6 +1,9 @@
 require 'yaml'
 
 module Sensei
+  class HTTPBadResponse < StandardError
+  end
+
   class Client
     cattr_accessor :sensei_hosts, :sensei_port, :http_kafka_port, :uid_key, :http_kafka_hosts, :fake_update
 
@@ -112,7 +115,7 @@ module Sensei
       if !fake_update
         req = Curl::Easy.new("http://#{http_kafka_hosts.sample}:#{http_kafka_port}/")
         req.http_post(items.map(&:to_json).join("\n"))
-        raise Exception, "Kafka url=#{req.url}, response_code=#{req.response_code}, response_body=#{req.body_str}" if req.response_code != 200
+        raise Sensei::HTTPBadResponse, "Kafka url=#{req.url}, response_code=#{req.response_code}, response_body=#{req.body_str}" if req.response_code != 200
         req.body_str
       end
     end
@@ -201,6 +204,7 @@ module Sensei
     def search
       req = Curl::Easy.new(self.class.sensei_url)
       req.http_post(self.to_h.to_json)
+      raise Sensei::HTTPBadResponse, "url=#{req.url}, response_code=#{req.response_code}, response_body=#{req.body_str}" if req.response_code != 200
       JSON.parse(req.body_str)
     end
 
