@@ -150,6 +150,12 @@ module Sensei
     end
   end
 
+  class WildcardQuery < Query
+    def to_h
+      {:wildcard => {options[:field] => options[:value].to_s}}
+    end
+  end
+
   class EmptyQuery < Query
 
     def &(x)
@@ -226,5 +232,16 @@ class Array
     else
       Sensei::BoolQuery.new(:operation => op, :operands => self.map{|value| {field => value}.to_sensei})
     end
+  end
+end
+
+
+
+# Method to query using wildcards
+# Usage: "Sh?n".to_sensei(:field). Sensei supports ? & * wildcards
+# http://senseidb.github.com/sensei/client-rest-query.html
+class String
+  def to_sensei(field)
+    Sensei::WildcardQuery.new(:field => field, :value => self)
   end
 end
