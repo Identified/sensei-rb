@@ -6,6 +6,7 @@ module Sensei
 
   class Client
     cattr_accessor :sensei_hosts, :sensei_port, :http_kafka_port, :uid_key, :http_kafka_hosts, :fake_update
+    attr_accessor :search_timeout
 
     DATA_TRANSACTION_KEY = "sensei_client_data_transaction"
     TEST_TRANSACTION_KEY = "sensei_client_test_transaction"
@@ -203,7 +204,7 @@ module Sensei
 
     def search
       req = Curl::Easy.new(self.class.sensei_url)
-      req.timeout = 15
+      req.timeout = self.search_timeout
       req.http_post(self.to_h.to_json)
       raise Sensei::HTTPBadResponse, "url=#{req.url}, response_code=#{req.response_code}, response_body=#{req.body_str}" if req.response_code != 200
       JSON.parse(req.body_str)
