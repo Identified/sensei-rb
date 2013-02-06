@@ -203,6 +203,7 @@ module Sensei
 
     def search
       req = Curl::Easy.new(self.class.sensei_url)
+      req.timeout = 15
       req.http_post(self.to_h.to_json)
       raise Sensei::HTTPBadResponse, "url=#{req.url}, response_code=#{req.response_code}, response_body=#{req.body_str}" if req.response_code != 200
       JSON.parse(req.body_str)
