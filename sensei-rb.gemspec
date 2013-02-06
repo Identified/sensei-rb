@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'sensei-rb'
-  s.version     = '0.0.0'
+  s.version     = '0.0.1'
   s.date        = '2012-04-20'
   s.summary     = "Ruby client for SenseiDB"
   s.description = "A ruby client for SenseiDB."
