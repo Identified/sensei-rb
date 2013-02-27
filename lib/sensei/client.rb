@@ -1,3 +1,4 @@
+# require 'erb'
 require 'yaml'
 
 module Sensei
@@ -13,6 +14,7 @@ module Sensei
 
     def self.configure(path = "config/sensei.yml")
       if File.exists? path
+        # config = YAML.load(ERB.new(File.read(path)).result)
         config = YAML.load_file(path)
 
         # Limit config to specific environment if Rails is defined
