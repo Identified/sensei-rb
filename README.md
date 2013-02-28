@@ -1,6 +1,6 @@
 sensei-rb
 =========
-[![Build Status](https://api.travis-ci.org/Identified/sensei-rb.png?branch=master)](https://api.travis-ci.org/Identified/sensei-rb?branch=master)
+[![Build Status](https://api.travis-ci.org/Identified/sensei-rb.png?branch=master)](https://travis-ci.org/Identified/sensei-rb)
 [![Code Climate](https://codeclimate.com/github/Identified/sensei-rb.png)](https://codeclimate.com/github/Identified/sensei-rb)
 
 Install
