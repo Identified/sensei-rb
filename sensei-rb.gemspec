@@ -12,6 +12,7 @@ Gem::Specification.new do |s|
   s.homepage = 'https://github.com/Identified/sensei-rb'
   s.license  = 'MIT'
 
+  s.add_dependency('activesupport')
   s.add_development_dependency('bundler')
   s.add_development_dependency('rake')
   s.add_development_dependency('rspec', '~> 2.13.0')

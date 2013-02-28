@@ -1,0 +1,10 @@
+common_ports: &common_ports
+  sensei_port: 8080
+  http_kafka_port: 9876
+
+some_rails_env:
+  <<: *common_ports
+  sensei_hosts:
+    - localhost
+  http_kafka_hosts:
+    - localhost
