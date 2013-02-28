@@ -14,4 +14,4 @@ gemfile:
 
 notifications:
   email:
-    - kevin@identified.com
+    - ci-admins@identified.com

@@ -7,8 +7,8 @@ Gem::Specification.new do |s|
   s.date        = '2012-04-20'
   s.summary     = "Ruby client for SenseiDB"
   s.description = "A ruby client for SenseiDB."
-  s.authors     = ["Jason Feng"]
-  s.email       = 'jason@identified.com'
+  s.authors     = ["Identified"]
+  s.email       = 'engineers@identified.com'
   s.homepage = 'https://github.com/Identified/sensei-rb'
   s.license  = 'MIT'
 
