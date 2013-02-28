@@ -1,1 +1,53 @@
-.idea/*
+*.rbc
+*.sassc
+.sass-cache
+capybara-*.html
+.idea
+.rspec
+/.bundle
+/vendor/bundle
+/log/*
+/tmp
+.DS_Store
+.vagrant
+.tm_properties
+/vendor/qbes
+.vagrant
+.tm_properties
+
+/db/*.sqlite3
+/public/system/*
+/coverage/
+/spec/tmp/*
+**.orig
+rerun.txt
+pickle-email-*.html
+*.js.js
+app/assets/stylesheets/application.css
+*.swp
+*.iml
+.pt
+*.rdb
+Vagrantfile
+db/structure.sql
+
+# JetBrains IDE files
+.idea
+*.iml
+*.iws
+piston.ipr
+
+# Zeus
+custom_plan.rb
+zeus.json
+
+# Ignore simplecov output
+coverage
+
+# Ignore ci_reporter output
+spec/reports
+
+# Ignore local config
+.ruby-version
+
+Gemfile.lock
